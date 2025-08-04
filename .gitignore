@@ -1,0 +1,37 @@
+# MonkeyTalkie .gitignore
+
+# Node modules (Büyük dosyalar)
+node_modules/
+package-lock.json
+
+# Build outputs (Executable dosyalar)
+dist/
+build/
+out/
+
+# Electron specific
+*.exe
+*.deb
+*.rpm
+*.dmg
+*.AppImage
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Environment variables
+.env
+
+# IDE files
+.vscode/
+.idea/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp

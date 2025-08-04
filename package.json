@@ -1,0 +1,88 @@
+{
+  "name": "monkeytalkie",
+  "version": "1.0.0",
+  "description": "Omgg Ekibinin Monkeylerine Özel Talkie Uygulaması",
+  "main": "main.js",
+  "author": "Ensar - Omgg Ekibi",
+  "homepage": "https://github.com/ensar/monkeytalkie",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "build-win": "electron-builder --win",
+    "build-linux": "electron-builder --linux",
+    "dist": "npm run build-win",
+    "pack": "electron-builder --dir",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "keywords": [
+    "monkeytalkie",
+    "omgg",
+    "voice-chat",
+    "gaming",
+    "team-chat",
+    "electron"
+  ],
+  "license": "MIT",
+  "build": {
+    "appId": "com.omgg.monkeytalkie",
+    "productName": "MonkeyTalkie",
+    "copyright": "Copyright © 2025 Ensar - Omgg Ekibi",
+    "directories": {
+      "buildResources": "assets",
+      "output": "dist"
+    },
+    "files": [
+      "**/*",
+      "!node_modules",
+      "!dist",
+      "!.git",
+      "!README.md"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "assets/icon.ico",
+      "artifactName": "${productName}-${version}-Setup.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": "always",
+      "createStartMenuShortcut": true,
+      "shortcutName": "MonkeyTalkie",
+      "installerIcon": "assets/icon.ico",
+      "uninstallerIcon": "assets/icon.ico",
+      "installerHeaderIcon": "assets/icon.ico",
+      "deleteAppDataOnUninstall": true,
+      "runAfterFinish": true,
+      "menuCategory": "Omgg Ekibi",
+      "displayLanguageSelector": false,
+      "installerLanguages": [
+        "tr_TR",
+        "en_US"
+      ],
+      "license": "assets/license.txt"
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "ensar",
+      "repo": "monkeytalkie",
+      "private": false
+    }
+  },
+  "dependencies": {
+    "electron-updater": "^6.1.4",
+    "socket.io-client": "^4.8.1"
+  },
+  "devDependencies": {
+    "electron": "^37.2.4",
+    "electron-builder": "^26.0.12"
+  }
+}

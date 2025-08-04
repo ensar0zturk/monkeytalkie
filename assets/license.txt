@@ -1,0 +1,6 @@
+MonkeyTalkie - Omgg Ekibinin Monkeylerine Özel Talkie Uygulaması
+
+Copyright (c) 2025 Ensar - Omgg Ekibi
+
+Omgg Ekibi için özel olarak geliştirilmiştir.
+MonkeyTalkie - Maymunlar için Talkie! 🐵
