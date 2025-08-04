@@ -1,6 +1,6 @@
 {
   "name": "monkeytalkie",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Omgg Ekibinin Monkeylerine Özel Talkie Uygulaması",
   "main": "main.js",
   "author": "Ensar - Omgg Ekibi",
@@ -69,16 +69,9 @@
         "en_US"
       ],
       "license": "assets/license.txt"
-    },
-    "publish": {
-      "provider": "github",
-      "owner": "ensar0zturk",
-      "repo": "monkeytalkie",
-      "private": false
     }
   },
   "dependencies": {
-    "electron-updater": "^6.1.4",
     "socket.io-client": "^4.8.1"
   },
   "devDependencies": {
