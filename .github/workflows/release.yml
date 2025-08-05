@@ -1,0 +1,39 @@
+name: Build and Release MonkeyTalkie
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        
+    - name: Install dependencies
+      run: |
+        cd oyun_sesli_sohbet_client
+        npm ci
+        
+    - name: Build application
+      run: |
+        cd oyun_sesli_sohbet_client
+        npm run build-win
+        
+    - name: Upload to Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          oyun_sesli_sohbet_client/dist/*.exe
+          oyun_sesli_sohbet_client/dist/*.blockmap
+          oyun_sesli_sohbet_client/dist/latest.yml
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
