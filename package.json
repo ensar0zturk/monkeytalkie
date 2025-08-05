@@ -1,7 +1,7 @@
 {
   "name": "monkeytalkie",
   "version": "1.0.4",
-  "description": "MonkeyTalkie",
+  "description": "MonkeyTalkie - Omgg Ekibinin Monkeylerine Özel",
   "main": "main.js",
   "author": "Ensar - Omgg Ekibi",
   "homepage": "https://github.com/ensar0zturk/monkeytalkie",
@@ -12,6 +12,8 @@
     "build-linux": "electron-builder --linux",
     "dist": "npm run build-win",
     "pack": "electron-builder --dir",
+    "publish": "electron-builder --win --publish=always",
+    "release": "npm version patch && npm run publish",
     "postinstall": "electron-builder install-app-deps"
   },
   "keywords": [
@@ -23,59 +25,51 @@
     "electron"
   ],
   "license": "MIT",
+  "devDependencies": {
+    "electron": "^37.2.4",
+    "electron-builder": "^24.13.3",
+    "electron-updater": "^6.1.7"
+  },
+  "dependencies": {
+    "socket.io-client": "^4.7.4"
+  },
   "build": {
     "appId": "com.omgg.monkeytalkie",
     "productName": "MonkeyTalkie",
-    "copyright": "Copyright © 2025 Ensar - Omgg Ekibi",
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "ensar0zturk",
+        "repo": "monkeytalkie"
+      }
+    ],
     "directories": {
-      "buildResources": "assets",
       "output": "dist"
     },
     "files": [
       "**/*",
-      "!node_modules",
-      "!dist",
+      "!**/*.md",
       "!.git",
-      "!README.md"
+      "!dist",
+      "!node_modules"
     ],
     "win": {
-      "target": [
-        {
-          "target": "nsis",
-          "arch": [
-            "x64"
-          ]
-        }
-      ],
+      "target": {
+        "target": "nsis",
+        "arch": [
+          "x64"
+        ]
+      },
       "icon": "assets/icon.ico",
-      "artifactName": "${productName}-${version}-Setup.${ext}"
+      "publisherName": "Omgg Team",
+      "requestedExecutionLevel": "asInvoker"
     },
     "nsis": {
       "oneClick": false,
-      "perMachine": false,
       "allowToChangeInstallationDirectory": true,
-      "createDesktopShortcut": "always",
+      "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "MonkeyTalkie",
-      "installerIcon": "assets/icon.ico",
-      "uninstallerIcon": "assets/icon.ico",
-      "installerHeaderIcon": "assets/icon.ico",
-      "deleteAppDataOnUninstall": true,
-      "runAfterFinish": true,
-      "menuCategory": "Omgg Ekibi",
-      "displayLanguageSelector": false,
-      "installerLanguages": [
-        "tr_TR",
-        "en_US"
-      ],
-      "license": "assets/license.txt"
+      "shortcutName": "MonkeyTalkie"
     }
-  },
-  "dependencies": {
-    "socket.io-client": "^4.8.1"
-  },
-  "devDependencies": {
-    "electron": "^37.2.4",
-    "electron-builder": "^26.0.12"
   }
 }

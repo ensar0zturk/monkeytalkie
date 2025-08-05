@@ -1376,6 +1376,34 @@ const app = {
         }
 
         console.log('🐵 MonkeyTalkie başarıyla yüklendi!');
+
+        // Güncelleme event'lerini dinle
+        if (window.electronAPI) {
+            window.electronAPI.onUpdateAvailable((event, info) => {
+                notification.show(`🔄 MonkeyTalkie v${info.version} indiriliyor...`, 'info');
+                console.log('🔄 Güncelleme mevcut:', info);
+            });
+
+            window.electronAPI.onDownloadProgress((event, progress) => {
+                const percent = Math.round(progress.percent);
+                if (percent % 10 === 0) { // Her %10'da bir bildir
+                    notification.show(`📥 Güncelleme indiriliyor: %${percent}`, 'info');
+                }
+                console.log(`📥 İndirme: %${percent}`);
+            });
+
+            window.electronAPI.onUpdateDownloaded((event, info) => {
+                notification.show('✅ MonkeyTalkie güncellemesi hazır! Yeniden başlatılıyor...', 'success');
+
+                setTimeout(() => {
+                    if (confirm('🐵 MonkeyTalkie güncellemesi tamamlandı!\n\nŞimdi yeniden başlatılsın mı?')) {
+                        // Renderer'dan main process'e mesaj gönder
+                        const { ipcRenderer } = require('electron');
+                        ipcRenderer.send('restart-app');
+                    }
+                }, 3000);
+            });
+        }
     }
 };
 
