@@ -5,7 +5,7 @@ let mainWindow;
 
 // Uygulama bilgileri - MonkeyTalkie
 app.setName('MonkeyTalkie');
-app.setVersion('1.0.0');
+app.setVersion('1.0.4'); // 1.0.0 → 1.0.4 olarak güncelle
 
 function createWindow() {
     mainWindow = new BrowserWindow({
@@ -13,7 +13,7 @@ function createWindow() {
         height: 800,
         minWidth: 800,
         minHeight: 600,
-        title: 'MonkeyTalkie - Omgg Ekibinin Monkeylerine Özel',
+        title: 'MonkeyTalkie v1.0.4', // Title güncelle
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
             nodeIntegration: true,
@@ -41,6 +41,11 @@ function createWindow() {
     mainWindow.on('closed', () => {
         mainWindow = null;
     });
+
+    mainWindow.on('page-title-updated', (event) => {
+        event.preventDefault(); // HTML title değişikliğini engelle
+        mainWindow.setTitle('MonkeyTalkie v1.0.4');
+    });
 }
 
 app.whenReady().then(() => {
@@ -60,4 +65,4 @@ app.on('window-all-closed', () => {
     }
 });
 
-console.log('🐵 MonkeyTalkie başlatıldı - Omgg Ekibinin Monkeylerine Özel!');
+console.log('🐵 MonkeyTalkie v1.0.4 başlatıldı - Omgg Ekibinin Monkeylerine Özel!');

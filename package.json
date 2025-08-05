@@ -1,7 +1,7 @@
 {
   "name": "monkeytalkie",
-  "version": "1.0.1",
-  "description": "Omgg Ekibinin Monkeylerine Özel Talkie Uygulaması",
+  "version": "1.0.4",
+  "description": "MonkeyTalkie",
   "main": "main.js",
   "author": "Ensar - Omgg Ekibi",
   "homepage": "https://github.com/ensar0zturk/monkeytalkie",

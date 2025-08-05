@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MonkeyTalkie - Omgg Ekibinin Monkeylerine Özel Talkie Uygulaması</title>
+    <title>MonkeyTalkie</title>
     <style>
         /* =============== RESET VE GENEL AYARLAR =============== */
         * {
@@ -291,8 +291,9 @@
         }
 
         .message {
+            display: flex;
+            align-items: flex-start;
             margin-bottom: 16px;
-            line-height: 1.5;
             padding: 16px 20px;
             background: rgba(26, 26, 46, 0.6);
             backdrop-filter: blur(10px);
@@ -301,40 +302,877 @@
             transition: all 0.3s ease;
         }
 
-        .message:hover {
-            background: rgba(26, 26, 46, 0.8);
-            border-color: rgba(138, 43, 226, 0.4);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 15px rgba(138, 43, 226, 0.1);
+        .message-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-right: 15px;
+            border: 3px solid rgba(138, 43, 226, 0.4);
+            background: rgba(26, 26, 46, 0.9);
+            flex-shrink: 0;
+            box-shadow: 0 3px 10px rgba(138, 43, 226, 0.3);
+        }
+
+        .message-content {
+            flex: 1;
+            min-width: 0;
         }
 
         .message .username {
             font-weight: 700;
-            color: #9966cc;
-            margin-right: 8px;
+            margin-bottom: 4px;
             font-size: 14px;
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .message .content {
-            color: rgba(240, 240, 255, 0.7);
+            color: rgba(240, 240, 255, 0.9);
             font-size: 14px;
-            font-weight: 500;
+            line-height: 1.4;
             word-wrap: break-word;
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
         }
 
-        .message .timestamp {
-            font-size: 12px;
-            color: #f0f0ff;
-            margin-left: 8px;
-            font-weight: 600;
+        /* Kullanıcı listesi avatarları */
+        .users-list li {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            color: #c8c8e8;
+            font-size: 14px;
+            border-radius: 8px;
+            margin-bottom: 6px;
+            transition: all 0.3s ease;
+            background: rgba(26, 26, 46, 0.3);
+            border: 1px solid transparent;
+            cursor: pointer;
         }
 
-        /* =============== KULLANICI LİSTESİ =============== */
+        .user-list-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            margin-right: 12px;
+            border: 3px solid rgba(138, 43, 226, 0.4);
+            background: rgba(26, 26, 46, 0.9);
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(138, 43, 226, 0.3);
+            position: relative;
+        }
+
+        /* Online durumu */
+        .user-status {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #00ff88;
+            border: 2px solid rgba(26, 26, 46, 0.8);
+            position: absolute;
+            bottom: -2px;
+            right: -2px;
+            animation: pulse 2s infinite;
+        }
+
+        /* Typing göstergesi */
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            padding: 15px 25px;
+            background: rgba(138, 43, 226, 0.15);
+            border-radius: 15px;
+            margin-bottom: 20px;
+            font-style: italic;
+            color: rgba(138, 43, 226, 0.9);
+            animation: fadeInOut 1.5s infinite;
+            font-size: 16px;
+            border: 2px solid rgba(138, 43, 226, 0.3);
+        }
+
+        @keyframes fadeInOut {
+
+            0%,
+            100% {
+                opacity: 0.6;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+
+        /* Avatar seçici modal */
+        .avatar-selector {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .avatar-selector-content {
+            background: rgba(22, 33, 62, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(138, 43, 226, 0.3);
+            text-align: center;
+            max-width: 650px;
+            max-height: 85vh;
+            margin: 20px;
+            border: 1px solid rgba(138, 43, 226, 0.3);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* Avatar seçici başlık sabit */
+        .avatar-selector-header {
+            flex-shrink: 0;
+            margin-bottom: 20px;
+        }
+
+        /* Avatar grid container */
+        .avatar-grid-container {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Avatar grid'de scroll sadece burada */
+        .avatar-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 25px;
+            padding: 25px;
+            overflow-y: auto;
+            flex: 1;
+            justify-items: center;
+            background:
+                linear-gradient(135deg, rgba(26, 26, 46, 0.4), rgba(138, 43, 226, 0.1)),
+                radial-gradient(circle at 30% 20%, rgba(138, 43, 226, 0.1), transparent 50%),
+                radial-gradient(circle at 70% 80%, rgba(153, 102, 204, 0.1), transparent 50%);
+            border-radius: 20px;
+            border: 2px solid rgba(138, 43, 226, 0.3);
+            max-height: 400px;
+            position: relative;
+        }
+
+        /* Avatar butonları sabit alt kısımda */
+        .avatar-buttons {
+            flex-shrink: 0;
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid rgba(138, 43, 226, 0.3);
+        }
+
+        /* Avatar grid scroll stilini iyileştir */
+        .avatar-grid::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .avatar-grid::-webkit-scrollbar-track {
+            background: rgba(26, 26, 46, 0.5);
+            border-radius: 4px;
+        }
+
+        .avatar-grid::-webkit-scrollbar-thumb {
+            background: linear-gradient(45deg, #8a2be2, #9966cc);
+            border-radius: 4px;
+            border: 1px solid rgba(26, 26, 46, 0.3);
+        }
+
+        .avatar-grid::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(45deg, #9966cc, #8a2be2);
+        }
+
+        /* Modal container scroll'u tamamen kaldır */
+        .avatar-selector-content::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Buton container'ını responsive yap */
+        .avatar-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid rgba(138, 43, 226, 0.3);
+        }
+
+        .avatar-buttons button {
+            min-width: 140px;
+            padding: 15px 30px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            border: none;
+            color: white;
+            font-size: 16px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        #save-avatar {
+            background: linear-gradient(45deg, #8a2be2, #9966cc) !important;
+        }
+
+        #save-avatar:hover {
+            transform: translateY(-3px) !important;
+            box-shadow: 0 8px 25px rgba(138, 43, 226, 0.5) !important;
+            background: linear-gradient(45deg, #9966cc, #8a2be2) !important;
+        }
+
+        #cancel-avatar {
+            background: linear-gradient(45deg, #ff4757, #ff3742) !important;
+        }
+
+        #cancel-avatar:hover {
+            transform: translateY(-3px) !important;
+            box-shadow: 0 8px 25px rgba(255, 71, 87, 0.5) !important;
+            background: linear-gradient(45deg, #ff3742, #ff4757) !important;
+        }
+
+        /* Active efekti ekle */
+        .avatar-buttons button:active {
+            transform: translateY(-1px) !important;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
+        }
+
+        /* Auth container stilleri ekle */
+        .auth-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .auth-form {
+            background: rgba(22, 33, 62, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(138, 43, 226, 0.3);
+            text-align: center;
+            min-width: 400px;
+            margin: 20px;
+            border: 1px solid rgba(138, 43, 226, 0.3);
+        }
+
+        .auth-form h2 {
+            color: #e8e8ff;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 30px;
+            background: linear-gradient(45deg, #8a2be2, #9966cc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .auth-form input {
+            width: 100%;
+            padding: 16px 20px;
+            margin-bottom: 20px;
+            border: 2px solid rgba(138, 43, 226, 0.3);
+            border-radius: 10px;
+            background: rgba(26, 26, 46, 0.8);
+            color: #e8e8ff;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+            box-sizing: border-box;
+        }
+
+        .auth-form input::placeholder {
+            color: rgba(232, 232, 255, 0.6);
+        }
+
+        .auth-form input:focus {
+            border-color: #8a2be2;
+            background: rgba(26, 26, 46, 0.95);
+            box-shadow: 0 0 15px rgba(138, 43, 226, 0.3);
+        }
+
+        .auth-form button {
+            width: 100%;
+            background: linear-gradient(45deg, #8a2be2, #9966cc);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 16px 20px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 15px rgba(138, 43, 226, 0.3);
+            margin-bottom: 20px;
+        }
+
+        .auth-form button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(138, 43, 226, 0.4);
+            background: linear-gradient(45deg, #9966cc, #8a2be2);
+        }
+
+        .auth-form p {
+            color: rgba(232, 232, 255, 0.8);
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .auth-form a {
+            color: #8a2be2;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .auth-form a:hover {
+            color: #9966cc;
+            text-decoration: underline;
+        }
+
+        .error-message {
+            background: rgba(255, 71, 87, 0.2);
+            color: #ff4757;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            border: 1px solid rgba(255, 71, 87, 0.3);
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+            animation: fadeInOut 0.3s ease;
+        }
+
+        /* Pulse animasyon ekle */
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(0, 255, 136, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(0, 255, 136, 0);
+            }
+        }
+
+        /* Timestamp stili ekle */
+        .timestamp {
+            font-size: 11px;
+            color: rgba(232, 232, 255, 0.5);
+            font-weight: 400;
+            margin-left: 8px;
+        }
+
+        /* Profil alanı stilleri */
+        .profile-section {
+            position: relative;
+            margin-top: auto;
+            padding-top: 16px;
+            border-top: 1px solid rgba(138, 43, 226, 0.3);
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            background: linear-gradient(135deg, rgba(26, 26, 46, 0.8), rgba(138, 43, 226, 0.1));
+            border-radius: 12px;
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(138, 43, 226, 0.3);
+            position: relative;
+            height: 72px;
+            box-sizing: border-box;
+        }
+
+        /* Hover efektini basitleştir */
+        .user-profile:hover {
+            background: linear-gradient(135deg, rgba(138, 43, 226, 0.2), rgba(153, 102, 204, 0.1));
+            border-color: rgba(138, 43, 226, 0.5);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(138, 43, 226, 0.2);
+        }
+
+        /* FAZLA EFEKTLERİ KALDIR */
+        .user-profile::before {
+            display: none !important;
+        }
+
+        @keyframes modalGlow {
+
+            0%,
+            100% {
+                opacity: 0;
+            }
+        }
+
+        /* =============== AVATAR SEÇİCİ TEMİZLEME =============== */
+
+        /* Avatar seçenekleri - BASİT VE TEMİZ HALİ */
+        .avatar-option {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            cursor: pointer;
+            border: 3px solid transparent;
+            background: rgba(26, 26, 46, 0.8);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(138, 43, 226, 0.2);
+        }
+
+        /* Hover efekti - BASİT */
+        .avatar-option:hover {
+            border-color: rgba(138, 43, 226, 0.7);
+            transform: scale(1.08);
+            box-shadow: 0 6px 20px rgba(138, 43, 226, 0.4);
+            background: rgba(138, 43, 226, 0.2);
+        }
+
+        /* Seçili avatar - BASİT VE BELİRGİN */
+        .avatar-option.selected {
+            border-color: #8a2be2;
+            background: rgba(138, 43, 226, 0.3);
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(138, 43, 226, 0.6);
+        }
+
+        /* Avatar grid - BASİT ARKA PLAN */
+        .avatar-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            padding: 20px;
+            overflow-y: auto;
+            flex: 1;
+            justify-items: center;
+            background: rgba(26, 26, 46, 0.4);
+            border-radius: 15px;
+            border: 2px solid rgba(138, 43, 226, 0.3);
+            max-height: 400px;
+        }
+
+        /* FAZLA EFEKTLERİ KALDIR */
+        .avatar-grid::before {
+            display: none !important;
+        }
+
+        @keyframes borderGlow {
+
+            0%,
+            100% {
+                opacity: 0;
+            }
+        }
+
+        .avatar-selector-content::before {
+            display: none !important;
+        }
+
+        #save-avatar::before,
+        #cancel-avatar::before {
+            display: none !important;
+        }
+
+        @keyframes shimmer {
+
+            0%,
+            100% {
+                opacity: 0;
+            }
+        }
+
+        /* Mesaj hover efektini basitleştir */
+        .message::before {
+            display: none !important;
+        }
+
+        .message:hover {
+            transform: translateY(-1px);
+            background: rgba(26, 26, 46, 0.7);
+            border-color: rgba(138, 43, 226, 0.4);
+            box-shadow: 0 4px 15px rgba(138, 43, 226, 0.15);
+        }
+
+        /* Kanal listesi efektlerini basitleştir */
+        .channels-list li::before {
+            display: none !important;
+        }
+
+        .channels-list li:hover {
+            background: rgba(138, 43, 226, 0.15);
+            border-color: rgba(138, 43, 226, 0.3);
+            transform: translateX(2px);
+            box-shadow: none;
+        }
+
+        /* Typing indicator efektlerini basitleştir */
+        .typing-indicator::before {
+            display: none !important;
+        }
+
+        @keyframes typingPulse {
+
+            0%,
+            100% {
+                opacity: 0.7;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+
+        @keyframes typingShimmer {
+
+            0%,
+            100% {
+                opacity: 0;
+            }
+        }
+
+        /* Buton hover efektlerini basitleştir */
+        #save-avatar:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 6px 20px rgba(138, 43, 226, 0.5) !important;
+        }
+
+        #cancel-avatar:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 6px 20px rgba(255, 71, 87, 0.5) !important;
+        }
+
+        /* =============== MOBILE RESPONSIVE =============== */
+        @media (max-width: 768px) {
+            .user-profile {
+                padding: 10px 12px;
+                height: 64px;
+            }
+
+            .profile-avatar {
+                width: 40px;
+                height: 40px;
+                font-size: 20px;
+                margin-right: 10px;
+            }
+
+            .profile-username {
+                font-size: 14px;
+            }
+
+            .profile-status {
+                font-size: 11px;
+            }
+
+            .profile-settings-icon {
+                width: 28px;
+                height: 28px;
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar {
+                width: 240px;
+            }
+
+            .user-profile {
+                padding: 8px 10px;
+                height: 56px;
+            }
+
+            .profile-avatar {
+                width: 36px;
+                height: 36px;
+                font-size: 18px;
+            }
+        }
+
+        /* =============== EKSİK PROFİL STİLLERİ =============== */
+
+        /* Profil avatar boyutunu ayarla */
+        .profile-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            background: rgba(138, 43, 226, 0.3);
+            border: 3px solid rgba(138, 43, 226, 0.6);
+            margin-right: 12px;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(138, 43, 226, 0.4);
+        }
+
+        /* Profil info kısmını düzenle */
+        .profile-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-width: 0;
+        }
+
+        /* Profile username stilini düzelt */
+        .profile-username {
+            color: #e8e8ff;
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.2;
+        }
+
+        /* Profile status stilini düzelt */
+        .profile-status {
+            color: rgba(232, 232, 255, 0.7);
+            font-size: 12px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            line-height: 1;
+        }
+
+        /* Settings icon'unu düzelt */
+        .profile-settings-icon {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: rgba(232, 232, 255, 0.6);
+            transition: all 0.3s ease;
+            border-radius: 6px;
+            flex-shrink: 0;
+        }
+
+        .profile-settings-icon:hover {
+            background: rgba(138, 43, 226, 0.2);
+            color: rgba(232, 232, 255, 0.9);
+        }
+
+        /* =============== EKSİK PROFİL MENU STİLLERİ =============== */
+
+        .profile-menu {
+            position: absolute;
+            bottom: 100%;
+            left: 0;
+            right: 0;
+            background: rgba(22, 33, 62, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 12px;
+            padding: 8px;
+            margin-bottom: 8px;
+            border: 1px solid rgba(138, 43, 226, 0.3);
+            box-shadow: 0 8px 32px rgba(138, 43, 226, 0.3);
+            z-index: 1000;
+            animation: slideUp 0.2s ease;
+        }
+
+        @keyframes slideUp {
+            0% {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .profile-menu-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            color: #e8e8ff;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            gap: 8px;
+        }
+
+        .profile-menu-item:hover {
+            background: rgba(138, 43, 226, 0.2);
+            color: #ffffff;
+        }
+
+        .profile-menu-item.danger {
+            color: #ff4757;
+        }
+
+        .profile-menu-item.danger:hover {
+            background: rgba(255, 71, 87, 0.2);
+            color: #ff3742;
+        }
+
+        /* =============== EKSİK CHAT INPUT STİLLERİ =============== */
+
+        .chat-input {
+            display: flex;
+            gap: 12px;
+            padding: 20px;
+            background: rgba(22, 33, 62, 0.9);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(138, 43, 226, 0.3);
+            align-items: center;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 14px 18px;
+            border: 2px solid rgba(138, 43, 226, 0.3);
+            border-radius: 10px;
+            background: rgba(26, 26, 46, 0.8);
+            color: #e8e8ff;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .chat-input input::placeholder {
+            color: rgba(232, 232, 255, 0.6);
+        }
+
+        .chat-input input:focus {
+            border-color: #8a2be2;
+            background: rgba(26, 26, 46, 0.95);
+            box-shadow: 0 0 15px rgba(138, 43, 226, 0.3);
+        }
+
+        .chat-input button {
+            background: linear-gradient(45deg, #8a2be2, #9966cc);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 14px 24px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 15px rgba(138, 43, 226, 0.3);
+            min-width: 100px;
+        }
+
+        .chat-input button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(138, 43, 226, 0.4);
+            background: linear-gradient(45deg, #9966cc, #8a2be2);
+        }
+
+        /* =============== EKSİK VOICE CONTROLS STİLLERİ =============== */
+
+        .voice-controls {
+            display: flex;
+            gap: 12px;
+            padding: 16px 20px;
+            background: rgba(22, 33, 62, 0.9);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(138, 43, 226, 0.3);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .voice-controls button {
+            flex: 1;
+            max-width: 200px;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: white;
+        }
+
+        .voice-controls button:not(.danger) {
+            background: linear-gradient(45deg, #2ed573, #26de81);
+            box-shadow: 0 4px 15px rgba(46, 213, 115, 0.3);
+        }
+
+        .voice-controls button.danger {
+            background: linear-gradient(45deg, #ff4757, #ff3742);
+            box-shadow: 0 4px 15px rgba(255, 71, 87, 0.3);
+        }
+
+        .voice-controls button:hover {
+            transform: translateY(-2px);
+        }
+
+        .voice-controls button:not(.danger):hover {
+            box-shadow: 0 6px 20px rgba(46, 213, 115, 0.4);
+        }
+
+        .voice-controls button.danger:hover {
+            box-shadow: 0 6px 20px rgba(255, 71, 87, 0.4);
+        }
+
+        /* =============== EKSİK USERS LIST STİLLERİ =============== */
+
         .users-list {
-            width: 240px;
-            min-width: 200px;
+            width: 280px;
+            min-width: 250px;
+            max-width: 350px;
             background: rgba(22, 33, 62, 0.9);
             backdrop-filter: blur(10px);
             border-left: 1px solid rgba(138, 43, 226, 0.3);
@@ -358,12 +1196,16 @@
         }
 
         .users-list h3 {
-            color: #c8c8e8;
-            margin-bottom: 16px;
-            font-size: 12px;
+            color: #e8e8ff;
+            font-size: 14px;
             font-weight: 700;
+            margin-bottom: 16px;
             text-transform: uppercase;
             letter-spacing: 1px;
+            background: linear-gradient(45deg, #8a2be2, #9966cc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .users-list ul {
@@ -372,388 +1214,64 @@
             margin: 0;
         }
 
-        .users-list li {
-            padding: 10px 12px;
-            color: #c8c8e8;
-            font-size: 14px;
-            border-radius: 8px;
-            margin-bottom: 4px;
-            transition: all 0.3s ease;
-            background: rgba(26, 26, 46, 0.3);
-            border: 1px solid transparent;
-        }
-
         .users-list li:hover {
             background: rgba(138, 43, 226, 0.2);
             border-color: rgba(138, 43, 226, 0.4);
-            color: #ffffff;
+            transform: translateX(-2px);
         }
 
-        .users-list li.speaking {
-            color: #00ff88;
-            font-weight: 600;
-            background: rgba(0, 255, 136, 0.1);
-            border-color: rgba(0, 255, 136, 0.3);
-        }
+        /* =============== RESPONSIVE DÜZELTME =============== */
 
-        .users-list li.speaking::before {
-            content: '●';
-            margin-right: 8px;
-            color: #00ff88;
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-
-            0%,
-            100% {
-                opacity: 1;
-            }
-
-            50% {
-                opacity: 0.5;
-            }
-        }
-
-        /* =============== SES KONTROLLERİ =============== */
-        .voice-controls {
-            background: rgba(22, 33, 62, 0.9);
-            backdrop-filter: blur(10px);
-            padding: 16px 20px;
-            display: flex;
-            gap: 16px;
-            border-top: 1px solid rgba(138, 43, 226, 0.3);
-            min-height: 60px;
-            align-items: center;
-        }
-
-        .voice-controls button {
-            flex: 1;
-            background: linear-gradient(45deg, rgba(138, 43, 226, 0.3), rgba(153, 102, 204, 0.3));
-            color: #e8e8ff;
-            border: 2px solid rgba(138, 43, 226, 0.4);
-            padding: 12px 20px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            min-height: 40px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            backdrop-filter: blur(5px);
-        }
-
-        .voice-controls button:hover {
-            background: linear-gradient(45deg, rgba(138, 43, 226, 0.5), rgba(153, 102, 204, 0.5));
-            border-color: #8a2be2;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(138, 43, 226, 0.3);
-        }
-
-        .voice-controls button.active {
-            background: linear-gradient(45deg, #00ff88, #00cc6a);
-            border-color: #00ff88;
-            color: #ffffff;
-        }
-
-        .voice-controls button.active:hover {
-            background: linear-gradient(45deg, #00cc6a, #00ff88);
-        }
-
-        .voice-controls button.danger {
-            background: linear-gradient(45deg, rgba(255, 71, 87, 0.3), rgba(255, 55, 66, 0.3));
-            border-color: rgba(255, 71, 87, 0.4);
-        }
-
-        .voice-controls button.danger:hover {
-            background: linear-gradient(45deg, rgba(255, 71, 87, 0.5), rgba(255, 55, 66, 0.5));
-            border-color: #ff4757;
-        }
-
-        /* =============== CHAT INPUT =============== */
-        .chat-input {
-            display: flex;
-            gap: 16px;
-            padding: 20px;
-            background: rgba(22, 33, 62, 0.9);
-            backdrop-filter: blur(10px);
-            border-top: 1px solid rgba(138, 43, 226, 0.3);
-            align-items: center;
-            min-height: 80px;
-        }
-
-        .chat-input input {
-            flex: 1;
-            padding: 14px 20px;
-            border: 2px solid rgba(138, 43, 226, 0.3);
-            border-radius: 12px;
-            font-size: 14px;
-            background: rgba(26, 26, 46, 0.8);
-            color: #e8e8ff;
-            outline: none;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(5px);
-        }
-
-        .chat-input input::placeholder {
-            color: rgba(232, 232, 255, 0.6);
-        }
-
-        .chat-input input:focus {
-            border-color: #8a2be2;
-            background: rgba(26, 26, 46, 0.95);
-            box-shadow: 0 0 15px rgba(138, 43, 226, 0.3);
-        }
-
-        .chat-input button {
-            background: linear-gradient(45deg, #8a2be2, #9966cc);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            padding: 14px 24px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            min-width: 100px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            box-shadow: 0 4px 15px rgba(138, 43, 226, 0.3);
-        }
-
-        .chat-input button:hover {
-            background: linear-gradient(45deg, #9966cc, #8a2be2);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(138, 43, 226, 0.4);
-        }
-
-        /* =============== AUTH CONTAINER =============== */
-        .auth-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .auth-form {
-            background: rgba(22, 33, 62, 0.95);
-            backdrop-filter: blur(20px);
-            padding: 50px 40px;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(138, 43, 226, 0.2);
-            text-align: center;
-            width: 100%;
-            max-width: 450px;
-            margin: 20px;
-            border: 1px solid rgba(138, 43, 226, 0.3);
-        }
-
-        .auth-form h2 {
-            background: linear-gradient(45deg, #8a2be2, #9966cc);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 30px;
-            font-size: 28px;
-            font-weight: 700;
-        }
-
-        .auth-form input {
-            width: 100%;
-            padding: 16px 20px;
-            margin-bottom: 20px;
-            border: 2px solid rgba(138, 43, 226, 0.3);
-            border-radius: 12px;
-            background: rgba(26, 26, 46, 0.8);
-            color: #e8e8ff;
-            font-size: 16px;
-            outline: none;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(5px);
-        }
-
-        .auth-form input::placeholder {
-            color: rgba(232, 232, 255, 0.6);
-        }
-
-        .auth-form input:focus {
-            border-color: #8a2be2;
-            background: rgba(26, 26, 46, 0.95);
-            box-shadow: 0 0 15px rgba(138, 43, 226, 0.3);
-        }
-
-        .auth-form button {
-            width: 100%;
-            padding: 16px;
-            background: linear-gradient(45deg, #8a2be2, #9966cc);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-bottom: 20px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            box-shadow: 0 4px 15px rgba(138, 43, 226, 0.3);
-        }
-
-        .auth-form button:hover {
-            background: linear-gradient(45deg, #9966cc, #8a2be2);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(138, 43, 226, 0.4);
-        }
-
-        .auth-form p {
-            color: #c8c8e8;
-            font-size: 14px;
-        }
-
-        .auth-form p a {
-            color: #8a2be2;
-            text-decoration: none;
-            font-weight: 600;
-            transition: color 0.3s ease;
-        }
-
-        .auth-form p a:hover {
-            color: #9966cc;
-            text-decoration: underline;
-        }
-
-        .error-message {
-            color: #ff4757;
-            margin-bottom: 20px;
-            font-size: 14px;
-            background: rgba(255, 71, 87, 0.1);
-            padding: 12px 16px;
-            border-radius: 8px;
-            border-left: 4px solid #ff4757;
-            backdrop-filter: blur(5px);
-        }
-
-        /* =============== RESPONSIVE DESIGN =============== */
-        @media (max-width: 1024px) {
-            .users-list {
-                width: 200px;
-                min-width: 180px;
-            }
-
-            .sidebar {
-                width: 240px;
-                min-width: 200px;
-            }
-        }
-
+        /* Mobile'da profil menüsünü düzelt */
         @media (max-width: 768px) {
-            #app-container {
-                flex-direction: column;
+            .avatar-selector-content {
+                max-width: 95vw;
+                max-height: 80vh;
+                padding: 20px;
+                margin: 10px;
             }
 
-            .sidebar {
-                width: 100%;
-                height: auto;
-                max-height: 250px;
-                border-right: none;
-                border-bottom: 1px solid rgba(138, 43, 226, 0.3);
-                padding: 16px;
+            .avatar-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 15px;
+                padding: 15px;
+                max-height: 300px;
             }
 
-            .channels-list {
-                max-height: 140px;
+            .avatar-option {
+                width: 70px;
+                height: 70px;
+                font-size: 35px;
             }
 
-            .main-content {
-                flex: 1;
-                height: calc(100vh - 250px);
-            }
-
-            .chat-area {
-                flex-direction: column;
-            }
-
-            .users-list {
-                width: 100%;
-                height: 120px;
-                border-left: none;
-                border-top: 1px solid rgba(138, 43, 226, 0.3);
-            }
-
-            .voice-controls {
-                flex-wrap: wrap;
-                gap: 12px;
-            }
-
-            .voice-controls button {
-                min-width: calc(50% - 6px);
-            }
-
-            #channelInputContainer {
-                gap: 8px;
+            .avatar-buttons button {
+                min-width: 120px;
+                padding: 12px 20px;
+                font-size: 14px;
             }
         }
 
         @media (max-width: 480px) {
-            .sidebar {
+            .avatar-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
                 padding: 12px;
-                max-height: 220px;
+                max-height: 250px;
             }
 
-            .main-content {
-                height: calc(100vh - 220px);
+            .avatar-option {
+                width: 65px;
+                height: 65px;
+                font-size: 32px;
             }
 
-            .top-bar {
-                padding: 12px 16px;
-                font-size: 16px;
-            }
-
-            .chat-messages {
-                padding: 16px;
-            }
-
-            .chat-input {
-                padding: 16px;
+            .avatar-buttons {
                 flex-direction: column;
                 gap: 12px;
             }
 
-            .chat-input input,
-            .chat-input button {
+            .avatar-buttons button {
                 width: 100%;
-            }
-
-            .users-list {
-                height: 100px;
-                padding: 12px;
-            }
-
-            .auth-form {
-                padding: 30px 24px;
-                margin: 16px;
-            }
-        }
-
-        /* =============== LANDSCAPE MOBILE =============== */
-        @media (max-height: 500px) and (orientation: landscape) {
-            .sidebar {
-                max-height: 140px;
-            }
-
-            .main-content {
-                height: calc(100vh - 140px);
-            }
-
-            .users-list {
-                height: 80px;
             }
         }
     </style>
@@ -786,7 +1304,41 @@
 
             <ul id="channels-list" class="channels-list">
             </ul>
-            <button id="logout-btn" class="logout-btn">Çıkış Yap</button>
+
+            <!-- DISCORD TARZI PROFİL ALANI EKLE -->
+            <div class="profile-section">
+                <div class="user-profile" id="user-profile" onclick="toggleProfileMenu()">
+                    <div class="profile-avatar" id="profile-avatar">
+                        🐵 <!-- JavaScript ile güncellenecek -->
+                    </div>
+                    <div class="profile-info">
+                        <div class="profile-username" id="profile-username">Kullanıcı</div>
+                        <div class="profile-status">🟢 Çevrimiçi</div>
+                    </div>
+                    <div class="profile-settings-icon">
+                        ⚙️
+                    </div>
+                </div>
+
+                <!-- Profil menüsü (gizli) -->
+                <div class="profile-menu" id="profile-menu" style="display: none;">
+                    <div class="profile-menu-item" onclick="openAvatarSelector()">
+                        🐵 Avatar Değiştir
+                    </div>
+                    <div class="profile-menu-item"
+                        onclick="console.log('Display name butonu tıklandı'); openDisplayNameChanger();"
+                        style="cursor: pointer;">
+                        ✏️ Görünen İsim Değiştir
+                    </div>
+                    <div class="profile-menu-item" onclick="openSettings()">
+                        ⚙️ Ayarlar
+                    </div>
+                    <hr style="border: 1px solid rgba(138, 43, 226, 0.3); margin: 8px 0;">
+                    <div class="profile-menu-item danger" onclick="logout()">
+                        🚪 Çıkış Yap
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="main-content">
@@ -814,6 +1366,36 @@
     </div>
     <!-- index.html -->
 
+
+    <!-- Avatar seçici modal ekle (body'nin sonuna) -->
+    <div id="avatar-selector" class="avatar-selector">
+        <div class="avatar-selector-content">
+            <!-- Sabit başlık -->
+            <div class="avatar-selector-header">
+                <h3
+                    style="color: #8a2be2; margin: 0; font-size: 24px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; background: linear-gradient(45deg, #8a2be2, #9966cc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                    🐵 Avatar Seç
+                </h3>
+            </div>
+
+            <!-- Avatar grid container -->
+            <div class="avatar-grid-container">
+                <div class="avatar-grid" id="avatar-grid">
+                    <!-- Avatar seçenekleri buraya gelecek -->
+                </div>
+            </div>
+
+            <!-- Sabit butonlar -->
+            <div class="avatar-buttons">
+                <button id="save-avatar" type="button" style="background: linear-gradient(45deg, #8a2be2, #9966cc);">
+                    Kaydet
+                </button>
+                <button id="cancel-avatar" type="button" style="background: linear-gradient(45deg, #ff4757, #ff3742);">
+                    İptal
+                </button>
+            </div>
+        </div>
+    </div>
 
     <script src="renderer.js"></script>
 

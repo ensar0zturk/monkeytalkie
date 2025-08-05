@@ -7,4 +7,4 @@ contextBridge.exposeInMainWorld('electronAPI', {
     onUpdateDownloaded: (callback) => ipcRenderer.on('update-downloaded', callback)
 });
 
-console.log('🐵 MonkeyTalkie Preload Script Yüklendi v1.0.0 - Omgg Ekibinin Monkeylerine Özel!');
+console.log('🐵 MonkeyTalkie Preload Script Yüklendi v1.0.4 - Omgg Ekibinin Monkeylerine Özel!');
